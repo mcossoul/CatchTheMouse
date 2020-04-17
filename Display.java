@@ -1,13 +1,14 @@
+import java.rmi.activation.UnknownObjectException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import processing.core.*;
 
 public class Display {
 	// Colors used for empty locations.
-	private static final int EMPTY_COLOR = 0xFFFFFFFF;
+	private static int EMPTY_COLOR;
 
 	// Color used for objects that have no defined color.
-	private static final int UNKNOWN_COLOR = 0x66666666;
+	private static int UNKNOWN_COLOR;
 
 	private PApplet p; // the applet we want to display on
 
@@ -32,6 +33,9 @@ public class Display {
 		this.w = w;
 		this.h = h;
 		this.p = p;
+
+		EMPTY_COLOR = p.color(0,0,0,0);
+		UNKNOWN_COLOR = p.color(200, 200, 200);
 
 		colors = new LinkedHashMap<Object, Integer>();
 		images = new LinkedHashMap<Object, PImage>();
