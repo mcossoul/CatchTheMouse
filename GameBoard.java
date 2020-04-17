@@ -37,7 +37,7 @@ public class GameBoard {
 	}
 
 	// Return true if the row and column in location loc are in bounds for the grid
-	public boolean isInGrid(Location loc) {
+	public boolean isInGrid(int row, int col) {
 
 		/*** YOU COMPLETE THIS METHOD ***/
 

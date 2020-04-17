@@ -159,7 +159,7 @@ public class Display {
 
     // Draw a box at the location
     public void highlightLocation(Location l, GameBoard g) {
-        if (g.isInGrid(l)) {
+        if (g.isInGrid(l.getRow(),l.getCol())) {
             p.fill(p.color(50, 200, 50, 150));
             p.rect(xCoordOf(l), yCoordOf(l), dx, dy);
         }
