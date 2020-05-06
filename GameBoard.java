@@ -1,25 +1,36 @@
 public class GameBoard {
 	private int[][] grid; 						// the grid that stores the pieces
+	private Mouse mouse;
 
 	public GameBoard(int width, int height) {
 		grid = new int[height][width];
+		mouse = new Mouse(height/2, width/2);
 
 		// Initialize starting positions
-		grid[0][0] = 1;
+		grid[ mouse.getRow() ][ mouse.getCol() ] = 1;
+		initWalls(3);
+	}
 
-
+	private void initWalls(int num) {
+		int row=0, col=0;
+		for (int i = 0; i < num; i++) {
+			do {
+				row = (int)( Math.random() * grid.length );
+				col = (int)( Math.random() * grid[0].length  );
+			} while (grid[row][col] != 0);
+			grid[row][col] = 2; // place a wall
+		}
 	}
 
 	// Make the requested move at (row, col) by changing the grid.
 	// returns false if no move was made, true if the move was successful.
 	public boolean move(int row, int col) {
-		System.out.println("[DEBUGGING INFO] You clicked in row " + row + " and column " + col);
+		// TODO necessary?
+		if (!mouse.move(row, col)) { return false; }
 
-		// check if move is not valid.  If so, return false.
-
-
-
-		return true; // if move was valid, return true
+		grid[mouse.getRow()][mouse.getCol()] = 1;
+		grid[mouse.getPrevRow()][mouse.getPrevCol()] = 0;
+		return true;
 	}
 
 	/*
@@ -37,10 +48,9 @@ public class GameBoard {
 	}
 
 	// Return true if the row and column in location loc are in bounds for the grid
-	public boolean isInGrid(int row, int col) {
-
-		/*** YOU COMPLETE THIS METHOD ***/
-
-		return false;
+	public static boolean isInGrid(int row, int col) {
+		// TODO
+//		return row >=0 && row < grid.length && col >= 0 && col < grid[0].length;
+		return true;
 	}
 }

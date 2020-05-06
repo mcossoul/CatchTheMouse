@@ -10,19 +10,16 @@ public class RunGraphicalGame extends PApplet {
 
 	public void setup() {
 		// Create a game object
-		game = new GameBoard(5, 5);
+		game = new GameBoard(11, 11);
 
 		// Create the display
 		// parameters: (10,10) is upper left of display
 		// (400, 400) is the width and height
-		display = new Display(this, 10, 10, 400, 400);
-
-		display.setColor(1, color(255, 0, 0)); // SET COLORS FOR PLAYER 1 & 2
-		display.setColor(2, color(0, 255, 0));
+		display = new Display(this, 55, 10, 400, 400);
 
 		// You can use images instead if you'd like.
-		// display.setImage(1, "assets/on.png");
-		// display.setImage(2, "assets/off.png");
+		 display.setImage(1, "assets/mouse.png");
+		 display.setImage(2, "assets/wall.png");
 
 		display.initializeWithGame(game);
 	}
@@ -30,11 +27,10 @@ public class RunGraphicalGame extends PApplet {
 	@Override
 	public void draw() {
 		background(200);
-
 		display.drawGrid(game.getGrid()); // display the game
 	}
 
-	public void mouseClicked() {
+	public void mouseReleased() {
 		Location loc = display.gridLocationAt(mouseX, mouseY);
 		int row = loc.getRow();
 		int col = loc.getCol();
