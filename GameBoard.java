@@ -15,8 +15,8 @@ public class GameBoard {
 		int row=0, col=0;
 		for (int i = 0; i < num; i++) {
 			do {
-				row = (int)( Math.random() * grid.length );
-				col = (int)( Math.random() * grid[0].length  );
+				row = (int)( 1 + Math.random() * (grid.length - 2) );
+				col = (int)( 1 + Math.random() * (grid[0].length - 2)  );
 			} while (grid[row][col] != 0);
 			grid[row][col] = 2; // place a wall
 		}
@@ -24,22 +24,43 @@ public class GameBoard {
 
 	// Make the requested move at (row, col) by changing the grid.
 	// returns false if no move was made, true if the move was successful.
-	public boolean move(int row, int col) {
-		// TODO necessary?
-		if (!mouse.move(row, col)) { return false; }
+	public boolean moveMouse(int dest_row, int dest_col) {
+		if ( !isInGrid(dest_row, dest_col) || grid[dest_row][dest_col] !=0 ||
+				Math.abs(dest_row - mouse.getRow()) > 1 || Math.abs(dest_col - mouse.getCol()) > 1 ||
+				(dest_row != mouse.getRow() && dest_col != mouse.getCol()) ) {
+			return false;
+		}
 
-		grid[mouse.getRow()][mouse.getCol()] = 1;
-		grid[mouse.getPrevRow()][mouse.getPrevCol()] = 0;
+		if ( !mouse.move(dest_row, dest_col) ) { return false; }
+
+		grid[ dest_row ][ dest_col ] = 1;
+		grid[ mouse.getRowPrev() ][ mouse.getColPrev() ] = 0;
 		return true;
+	}
+
+	public boolean addWall(int dest_row, int dest_col) {
+		if ( !isInInsideGrid(dest_row, dest_col) || grid[dest_row][dest_col] !=0) {
+			return false;
+		}
+
+		grid[ dest_row ][ dest_col ] = 2;
+		return true;
+	}
+
+	public void move(int row, int col, int dest_row, int dest_col) {
+		int piece = grid[row][col];
+		grid[ dest_row ][ dest_col ] = piece;
+		grid[ row ][ col ] = 0;
 	}
 
 	/*
 	 * Return true if the game is over. False otherwise.
 	 */
 	public boolean isGameOver() {
-
-		/*** YOU COMPLETE THIS METHOD ***/
-
+		if (mouse.getRow() == 0 || mouse.getRow() == grid.length-1 || mouse.getCol() == 0 || mouse.getCol() == grid[0].length-1) {
+			grid[ mouse.getRow() ][ mouse.getCol() ] = 3;
+			return true;
+		}
 		return false;
 	}
 
@@ -48,9 +69,11 @@ public class GameBoard {
 	}
 
 	// Return true if the row and column in location loc are in bounds for the grid
-	public static boolean isInGrid(int row, int col) {
-		// TODO
-//		return row >=0 && row < grid.length && col >= 0 && col < grid[0].length;
-		return true;
+	public boolean isInGrid(int row, int col) {
+		return row >=0 && row < grid.length && col >= 0 && col < grid[0].length;
+	}
+
+	public boolean isInInsideGrid(int row, int col) {
+		return row >0 && row < grid.length-1 && col > 0 && col < grid[0].length-1;
 	}
 }
