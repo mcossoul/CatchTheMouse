@@ -16,7 +16,7 @@ public class Display {
     private int x, y, w, h; // (x, y) of upper left corner of display
     // the width and height of the display
 
-    private float dx, dy; // calculate the width and height of each box
+    private float dx, x_shift, dy; // calculate the width and height of each box
     // in the field display using the size of the field
     // and the width and height of the display
 
@@ -42,7 +42,10 @@ public class Display {
         images = new LinkedHashMap<Object, PImage>();
     }
 
-    public void drawGrid(int[][] f) {
+    /*
+     * Don't draw 1 row/col around the grid (so mouse can move out of it)
+     */
+    public void drawInsideGrid(int[][] f) {
         int piece;
         int numcols = f[0].length;
         int numrows = f.length;
@@ -53,58 +56,14 @@ public class Display {
                 int pieceColor = getColor(piece);
                 PImage pieceImage = getImage(piece);
 
+                float shift = (i%2 == 1) ? x_shift : 0;
+
                 if (pieceImage != null) {
-                    p.image(pieceImage, x + j * dx, y + i * dy, dx, dy);
-                } else {
+                    p.image(pieceImage, x + shift + j * dx, y + i * dy, dx, dy);
+                } else if ( i > 0 && i < numrows-1 && j > 0 && j < numcols-1 ){
                     p.fill(getColor(piece));
-                    p.rect(x + j * dx, y + i * dy, dx, dy);
+                    p.rect(x + shift + j * dx, y + i * dy, dx, dy);
                 }
-            }
-        }
-    }
-
-    public void displayTextOnGrid(int[][] grid, int fontsize) {
-        displayTextOnGrid(grid, fontsize, 0, 0);
-    }
-
-    public void displayTextOnGrid(int[][] grid, int fontsize, int horizontal_adjust, int vertical_adjust) {
-        int text;
-        int numcols = grid[0].length;
-        int numrows = grid.length;
-
-        p.textSize(fontsize);
-
-        for (int i = 0; i < numrows; i++) {
-            for (int j = 0; j < numcols; j++) {
-                text = grid[i][j];
-
-                p.fill(p.color(0, 0, 0));   // display text in black
-                p.textMode(p.CENTER);
-                p.text(text, x + j * dx + dx/2 - fontsize/2 + horizontal_adjust,
-                        y + i * dy + dy/2 + fontsize/2 + vertical_adjust);
-            }
-        }
-    }
-
-    public void displayTextOnGrid(String[][] grid, int fontsize) {
-        displayTextOnGrid(grid, fontsize, 0, 0);
-    }
-
-    public void displayTextOnGrid(String[][] grid, int fontsize, int horizontal_adjust, int vertical_adjust) {
-        String text;
-        int numcols = grid[0].length;
-        int numrows = grid.length;
-
-        p.textSize(fontsize);
-
-        for (int i = 0; i < numrows; i++) {
-            for (int j = 0; j < numcols; j++) {
-                text = grid[i][j];
-
-                p.fill(p.color(0, 0, 0));   // display text in black
-                p.textMode(p.CENTER);
-                p.text(text, x + j * dx + dx/2 - fontsize/2 + horizontal_adjust,
-                        y + i * dy + dy/2 + fontsize/2 + vertical_adjust);
             }
         }
     }
@@ -157,14 +116,6 @@ public class Display {
         return img;
     }
 
-    // Draw a box at the location
-    public void highlightLocation(Location l, GameBoard g) {
-        if (g.isInGrid(l.getRow(),l.getCol())) {
-            p.fill(p.color(50, 200, 50, 150));
-            p.rect(xCoordOf(l), yCoordOf(l), dx, dy);
-        }
-    }
-
     // return the y pixel value of the upper-left corner of location l
     private float yCoordOf(Location l) {
         return y + l.getRow() * dy;
@@ -172,19 +123,19 @@ public class Display {
 
     // return the x pixel value of the upper-left corner of location l
     private float xCoordOf(Location l) {
-        return x + l.getCol() * dx;
+        float shift = ( l.getRow()%2 == 1 ) ? x_shift : 0;
+        return x + shift + l.getCol() * dx;
     }
 
     // Return location at coordinates x, y on the screen
     public Location gridLocationAt(float mousex, float mousey) {
-        Location l = new Location((int) Math.floor((mousey - y) / dy),
-                (int) Math.floor((mousex - x) / dx));
-        return l;
-    }
+        int row = (int) Math.floor( (mousey - y) / dy );
 
-    // Return whether (x, y) is over the board or not
-    public boolean overBoard(float mx, float my) {
-        return (mx >= x && mx <= x + w && my > y && my < y + h);
+        float shift = (row%2 == 1) ? x_shift : 0;
+        int col = (int) Math.floor( (mousex - (x + shift)) / dx );
+
+        Location l = new Location(row , col);
+        return l;
     }
 
     public void setNumCols(int numCols) {
@@ -205,6 +156,7 @@ public class Display {
         }
         setNumCols(grid[0].length);
         setNumRows(grid.length);
+        this.x_shift = dx/2;
         System.out.println("Setting disply: # rows is " + grid.length + ", # cols is " + grid[0].length);
     }
 }

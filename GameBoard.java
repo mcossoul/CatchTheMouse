@@ -25,16 +25,21 @@ public class GameBoard {
 	// Make the requested move at (row, col) by changing the grid.
 	// returns false if no move was made, true if the move was successful.
 	public boolean moveMouse(int dest_row, int dest_col) {
-		if ( !isInGrid(dest_row, dest_col) || grid[dest_row][dest_col] !=0 ||
-				Math.abs(dest_row - mouse.getRow()) > 1 || Math.abs(dest_col - mouse.getCol()) > 1 ||
-				(dest_row != mouse.getRow() && dest_col != mouse.getCol()) ) {
+		if ( !isInGrid(dest_row, dest_col) || grid[dest_row][dest_col] != 0 ||
+				Math.abs(dest_row - mouse.getRow()) > 1  || Math.abs(dest_col - mouse.getCol()) > 1) {
 			return false;
 		}
 
-		if ( !mouse.move(dest_row, dest_col) ) { return false; }
+		// Check diagonal moves
+		if ( dest_row != mouse.getRow()	) {
+			if ( dest_col%2 == 0 && dest_col < mouse.getCol() ||
+				 dest_col%2 == 1 && dest_col > mouse.getCol() ) {
+				return false;
+			}
+		}
 
-		grid[ dest_row ][ dest_col ] = 1;
-		grid[ mouse.getRowPrev() ][ mouse.getColPrev() ] = 0;
+        grid_move( mouse.getRow(), mouse.getCol(), dest_row, dest_col );
+        mouse.move(dest_row, dest_col);
 		return true;
 	}
 
@@ -47,7 +52,7 @@ public class GameBoard {
 		return true;
 	}
 
-	public void move(int row, int col, int dest_row, int dest_col) {
+	public void grid_move(int row, int col, int dest_row, int dest_col) {
 		int piece = grid[row][col];
 		grid[ dest_row ][ dest_col ] = piece;
 		grid[ row ][ col ] = 0;

@@ -1,6 +1,6 @@
 public class Mouse {
-    private int row, prev_row = 0;
-    private int col, prev_col = 0;
+    private int row, row_prev = 0;
+    private int col, col_prev = 0;
 
     public Mouse(int row, int col) {
         this.row = row;
@@ -8,11 +8,8 @@ public class Mouse {
     }
 
     public boolean move(int dest_row, int dest_col) {
-        if ( !GameBoard.isInGrid(dest_row, dest_col) || Math.abs(dest_row - row) > 1 || Math.abs(dest_col - col) > 1 ) {
-            return false;
-        }
-        this.prev_row = this.row;
-        this.prev_col = this.col;
+        this.row_prev = this.row;
+        this.col_prev = this.col;
         this.row = dest_row;
         this.col = dest_col;
         return true;
@@ -26,11 +23,11 @@ public class Mouse {
         return col;
     }
 
-    public int getPrevRow() {
-        return prev_row;
+    public int getRowPrev() {
+        return row_prev;
     }
 
-    public int getPrevCol() {
-        return prev_col;
+    public int getColPrev() {
+        return col_prev;
     }
 }

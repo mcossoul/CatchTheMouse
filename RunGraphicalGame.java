@@ -3,31 +3,33 @@ import processing.core.*;
 public class RunGraphicalGame extends PApplet {
 	GameBoard game;
 	Display display;
+	private boolean mouse_turn = false;
+
 
 	public void settings() {
-		size(640, 550);
+		size(580, 560);
 	}
 
 	public void setup() {
-		// Create a game object
-		game = new GameBoard(11, 11);
+		game = new GameBoard(13, 13);
 
-		// Create the display
-		// parameters: (10,10) is upper left of display
-		// (400, 400) is the width and height
-		display = new Display(this, 55, 10, 400, 400);
-
-		// You can use images instead if you'd like.
-		 display.setImage(1, "assets/mouse.png");
-		 display.setImage(2, "assets/wall.png");
-
+		display = new Display(this, 10, 10, 550, 550);
+		display.setImage(1, "assets/mouse.png");
+		display.setImage(2, "assets/wall.png");
+		display.setImage(3, "assets/cheese.png");
 		display.initializeWithGame(game);
 	}
 
 	@Override
 	public void draw() {
 		background(200);
-		display.drawGrid(game.getGrid()); // display the game
+		if ( game.isGameOver() ) {
+			display.drawInsideGrid(game.getGrid()); // display the game
+			System.out.println("You lost! Try again.");
+			super.stop();
+		} else {
+			display.drawInsideGrid(game.getGrid()); // display the game
+		}
 	}
 
 	public void mouseReleased() {
@@ -35,7 +37,12 @@ public class RunGraphicalGame extends PApplet {
 		int row = loc.getRow();
 		int col = loc.getCol();
 
-		game.move(row, col);
+		if (mouse_turn) {
+			if ( game.moveMouse(row, col) ) { mouse_turn = !mouse_turn; }
+		}
+		else {
+			if ( game.addWall(row, col) ) { mouse_turn = !mouse_turn; }
+	}
 	}
 
 	// main method to launch this Processing sketch from computer
