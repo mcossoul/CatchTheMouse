@@ -1,14 +1,94 @@
 public class GameBoard {
-	private int[][] grid; 						// the grid that stores the pieces
+	private int[][] grid, move_grid; 						// the grid that stores the pieces
 	private Mouse mouse;
 
 	public GameBoard(int width, int height) {
 		grid = new int[height][width];
+		move_grid = new int[height][width];
 		mouse = new Mouse(height/2, width/2);
 
 		// Initialize starting positions
 		grid[ mouse.getRow() ][ mouse.getCol() ] = 1;
 		initWalls(3);
+
+		initMoveGrid();
+	}
+
+	private void initMoveGrid() {
+		for (int r = 1; r <= move_grid.length / 2; r++) {
+			for (int c = 1; c <= move_grid[0].length / 2; c++) {
+				if (r == 1 || c == 1) {
+					replicateQuarters(r, c, 1);
+
+				} else {
+					replicateQuarters(r, c, findMinValue(r, c) + 1);
+				}
+			}
+		}
+
+		System.out.println("[DEBUG] move_grid[][]:");
+		for (int r = 1; r <= move_grid.length - 2; r++) {
+			for (int c = 1; c <= move_grid[0].length - 2; c++) {
+				System.out.print(move_grid[r][c] + "\t");
+			}
+			System.out.println();
+		}
+	}
+
+
+	private void replicateQuarters(int r, int c, int val) {
+		int other_row = move_grid.length-1 - r;
+		int other_col = move_grid[0].length-1 - c;
+
+		move_grid[r][c] = val;
+		move_grid[r][other_col] = val;
+		move_grid[other_row][c] = val;
+		move_grid[other_row][other_col] = val;
+	}
+
+	private int findMinValue(int row, int col) {
+		int min = Integer.MAX_VALUE;
+		for (int r = row-1; r <= row+1; r++) {
+			for (int c = col-1; c <= col+1 ; c++) {
+				// skip non hexagonal moves
+				if ( r != row ) {
+					if ( row%2 == 0 && c == col+1 || row%2 == 1 && c == col-1) {
+						continue;
+					}
+				}
+
+				if ( isInGrid(r, c) ) {
+					if ( move_grid[r][c] > 0 && move_grid[r][c] < min ){
+						min = move_grid[r][c];
+					}
+				}
+			}
+		}
+		return min;
+	}
+
+	private int[] findDirection(int row, int col) {
+		int min = Integer.MAX_VALUE;
+		int[] min_coords = new int[2];
+		for (int r = row-1; r <= row+1; r++) {
+			for (int c = col-1; c <= col+1 ; c++) {
+				// skip non hexagonal moves
+				if ( r != row ) {
+					if ( row%2 == 0 && c == col+1 || row%2 == 1 && c == col-1) {
+						continue;
+					}
+				}
+
+				if ( isInGrid(r, c) && grid[r][c] == 0) {
+					if ( move_grid[r][c] < min ){
+						min = move_grid[r][c];
+						min_coords[0] = r;
+						min_coords[1] = c;
+					}
+				}
+			}
+		}
+		return min_coords;
 	}
 
 	private void initWalls(int num) {
@@ -40,6 +120,13 @@ public class GameBoard {
 
         grid_move( mouse.getRow(), mouse.getCol(), dest_row, dest_col );
         mouse.move(dest_row, dest_col);
+		return true;
+	}
+
+	public boolean moveMouse() {
+		int[] dest = findDirection( mouse.getRow(), mouse.getCol() );
+		grid_move( mouse.getRow(), mouse.getCol(), dest[0], dest[1] );
+		mouse.move(dest[0], dest[1]);
 		return true;
 	}
 
