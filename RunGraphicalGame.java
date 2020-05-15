@@ -1,10 +1,10 @@
 import processing.core.*;
 
 public class RunGraphicalGame extends PApplet {
+	int num_players = 1;
 	GameBoard game;
 	Display display;
 	private boolean mouse_turn = false;
-
 
 	public void settings() {
 		size(580, 560);
@@ -37,12 +37,15 @@ public class RunGraphicalGame extends PApplet {
 		int row = loc.getRow();
 		int col = loc.getCol();
 
-		if (mouse_turn) {
-			if ( game.moveMouse(row, col) ) { mouse_turn = !mouse_turn; }
+		if (num_players == 2 && mouse_turn) {
+			game.moveMouse(row, col);
+			mouse_turn = !mouse_turn;
 		}
 		else {
-			if ( game.addWall(row, col) ) { mouse_turn = !mouse_turn; }
-	}
+			game.addWall(row, col);
+			if (num_players ==1) { game.moveMouse(); }
+			mouse_turn = !mouse_turn;
+		}
 	}
 
 	// main method to launch this Processing sketch from computer

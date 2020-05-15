@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GridGameTurnOffTheLights.iml" filepath="$PROJECT_DIR$/GridGameTurnOffTheLights.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CatchTheMouse.iml" filepath="$PROJECT_DIR$/CatchTheMouse.iml" />
     </modules>
   </component>
 </project>

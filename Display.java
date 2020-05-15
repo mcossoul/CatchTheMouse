@@ -157,6 +157,6 @@ public class Display {
         setNumCols(grid[0].length);
         setNumRows(grid.length);
         this.x_shift = dx/2;
-        System.out.println("Setting disply: # rows is " + grid.length + ", # cols is " + grid[0].length);
+        System.out.println("Setting display: # rows is " + grid.length + ", # cols is " + grid[0].length);
     }
 }
