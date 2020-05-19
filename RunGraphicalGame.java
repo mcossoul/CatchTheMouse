@@ -14,9 +14,10 @@ public class RunGraphicalGame extends PApplet {
 		game = new GameBoard(13, 13);
 
 		display = new Display(this, 10, 10, 550, 550);
+		// TODO replace grid squares w/ hexagons
 		display.setImage(1, "assets/mouse.png");
-		display.setImage(2, "assets/wall.png");
-		display.setImage(3, "assets/cheese.png");
+		display.setImage(2, "assets/cheese.png");
+		display.setImage(4, "assets/wall.png"); // wall
 		display.initializeWithGame(game);
 	}
 

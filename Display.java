@@ -50,10 +50,10 @@ public class Display {
         int numcols = f[0].length;
         int numrows = f.length;
 
+
         for (int i = 0; i < numrows; i++) {
             for (int j = 0; j < numcols; j++) {
                 piece = f[i][j];
-                int pieceColor = getColor(piece);
                 PImage pieceImage = getImage(piece);
 
                 float shift = (i%2 == 1) ? x_shift : 0;
@@ -61,12 +61,36 @@ public class Display {
                 if (pieceImage != null) {
                     p.image(pieceImage, x + shift + j * dx, y + i * dy, dx, dy);
                 } else if ( i > 0 && i < numrows-1 && j > 0 && j < numcols-1 ){
+                    // TODO replace w/ draw_hexagon()
                     p.fill(getColor(piece));
+//                    draw_hexagon(50);
+                    // TODO remove when displaying hexagons
                     p.rect(x + shift + j * dx, y + i * dy, dx, dy);
                 }
             }
         }
     }
+
+    void draw_hexagon(int diam) {
+        // TODO fix dimensions
+        int dx = (int)( 0.80 * diam );
+        int dy = (int)( 0.25 * diam ) ;
+        p.translate(100, 100);
+        p.background(51);
+        p.fill(102);
+        p.stroke(255);
+        p.strokeWeight(2);
+        p.beginShape();
+        p.vertex(0, -2*dy );
+        p.vertex(dx, -dy );
+        p.vertex(dx, dy );
+        p.vertex(0, 2*dy );
+        p.vertex(-dx, dy );
+        p.vertex(-dx, -dy );
+        p.endShape();
+    }
+
+
 
     /**
      * Define a color to be used for a given value in the grid.
