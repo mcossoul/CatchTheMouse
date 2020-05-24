@@ -3,7 +3,7 @@ import javax.naming.InitialContext;
 public class GameBoard {
 	private int[][] grid, move_grid; 						// the grid that stores the pieces
 	private Mouse mouse;
-    private static final int INIT_WALLS = 10; //3
+    private static final int INIT_WALLS = 0; // 10; //3
 	private static final int MOVE_WEIGHT = 3;
 
 	public GameBoard(int width, int height) {

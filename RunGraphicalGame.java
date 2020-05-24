@@ -7,13 +7,13 @@ public class RunGraphicalGame extends PApplet {
 	private boolean mouse_turn = false;
 
 	public void settings() {
-		size(580, 560);
+		size(715, 635);
 	}
 
 	public void setup() {
 		game = new GameBoard(13, 13);
 
-		display = new Display(this, 10, 10, 550, 550);
+		display = new Display(this, 30, 35, 550, 550);
 		// TODO replace grid squares w/ hexagons
 		display.setImage(1, "assets/mouse.png");
 		display.setImage(2, "assets/cheese.png");

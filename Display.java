@@ -1,29 +1,16 @@
-import java.rmi.activation.UnknownObjectException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import processing.core.*;
 
 public class Display {
-    // Colors used for empty locations.
-    private static int EMPTY_COLOR;
-
-    // Color used for objects that have no defined color.
-    private static int UNKNOWN_COLOR;
-
     private PApplet p; // the applet we want to display on
 
-    private int x, y, w, h; // (x, y) of upper left corner of display
-    // the width and height of the display
-
-    private float dx, x_shift, dy; // calculate the width and height of each box
-    // in the field display using the size of the field
-    // and the width and height of the display
-
+    private int x, y, w, h; // (x, y) of upper left corner of display, the width and height of the display
+    private int dx, x_shift, dy; // calculate the width and height of each box
     private int rows, cols;
 
     // A map for storing colors for participants in the simulation
-    private Map<Object, Integer> colors;
     private Map<Object, PImage> images;
 
     // (x, y) is the upper-left corner of the display in pixels
@@ -35,10 +22,6 @@ public class Display {
         this.h = h;
         this.p = p;
 
-        EMPTY_COLOR = p.color(0, 0, 0, 0);
-        UNKNOWN_COLOR = p.color(200, 200, 200);
-
-        colors = new LinkedHashMap<Object, Integer>();
         images = new LinkedHashMap<Object, PImage>();
     }
 
@@ -46,60 +29,52 @@ public class Display {
      * Don't draw 1 row/col around the grid (so mouse can move out of it)
      */
     public void drawInsideGrid(int[][] f) {
-        int piece;
-        int numcols = f[0].length;
-        int numrows = f.length;
+        int piece, hex_x;
+        int img_dx = -dx/2; // origin shift (image top left, hexagon center)
+        int img_dy = -dy/2;
 
-
-        for (int i = 0; i < numrows; i++) {
-            for (int j = 0; j < numcols; j++) {
-                piece = f[i][j];
-                PImage pieceImage = getImage(piece);
-
-                float shift = (i%2 == 1) ? x_shift : 0;
-
-                if (pieceImage != null) {
-                    p.image(pieceImage, x + shift + j * dx, y + i * dy, dx, dy);
-                } else if ( i > 0 && i < numrows-1 && j > 0 && j < numcols-1 ){
-                    // TODO replace w/ draw_hexagon()
-                    p.fill(getColor(piece));
-//                    draw_hexagon(50);
-                    // TODO remove when displaying hexagons
-                    p.rect(x + shift + j * dx, y + i * dy, dx, dy);
+        for (int r = 0; r < rows; r++) {
+            hex_x = ( r%2 == 1 ) ? x + x_shift : x;
+            for (int c = 0; c < cols; c++) {
+                piece = f[r][c];
+                if (piece == 1) { // mouse
+                    PImage pieceImage = getImage(piece);
+                    draw_hexagon( false, hex_x + c*dx, y + r*dy, dx ); // draw empty hexagon on top of it
+                    p.image(pieceImage, hex_x + img_dx + c*dx, y + img_dy + r*dy, dx, dy);
+                } else if (piece == 2) { // cheese
+                    PImage pieceImage = getImage(piece);
+                    p.image(pieceImage, hex_x + img_dx + c*dx, y + img_dy + r*dy, dx, dy);
+                } else if (piece == 4) { // wall
+                    draw_hexagon( true, hex_x + c*dx, y + r*dy, dx );
+                } else if ( r > 0 && r < rows-1 && c > 0 && c < cols-1 ){ // empty space
+                    draw_hexagon( false, hex_x + c * dx, y + r * dy, dx );
                 }
             }
         }
     }
 
-    void draw_hexagon(int diam) {
-        // TODO fix dimensions
-        int dx = (int)( 0.80 * diam );
-        int dy = (int)( 0.25 * diam ) ;
-        p.translate(100, 100);
-        p.background(51);
-        p.fill(102);
-        p.stroke(255);
-        p.strokeWeight(2);
+    void draw_hexagon(boolean fill, int x, int y, int diam) {
+        diam += 8;
+        int hex_dx = (int)( 0.433 * diam );
+        int hex_dy = (int)( 0.25 * diam );
+
+//        p.background(51);
+        if (fill) {
+            p.fill(196, 85, 26);
+        } else {
+            p.fill(100,255,100);
+        }
+        p.stroke(0);
+        p.strokeWeight(1);
         p.beginShape();
-        p.vertex(0, -2*dy );
-        p.vertex(dx, -dy );
-        p.vertex(dx, dy );
-        p.vertex(0, 2*dy );
-        p.vertex(-dx, dy );
-        p.vertex(-dx, -dy );
+        p.vertex(x         , y - 2*hex_dy );
+        p.vertex(x + hex_dx, y - hex_dy );
+        p.vertex(x + hex_dx, y + hex_dy );
+        p.vertex(x         , y + 2*hex_dy );
+        p.vertex(x - hex_dx, y + hex_dy );
+        p.vertex(x - hex_dx, y - hex_dy );
+        p.vertex(x         , y - 2*hex_dy );
         p.endShape();
-    }
-
-
-
-    /**
-     * Define a color to be used for a given value in the grid.
-     *
-     * @param pieceType The type of piece in the grid.
-     * @param color     The color to be used for the given type of piece.
-     */
-    public void setColor(Object pieceType, Integer color) {
-        colors.put(pieceType, color);
     }
 
     /**
@@ -123,64 +98,52 @@ public class Display {
         setImage(pieceType, img);
     }
 
-    /**
-     * @return The color to be used for a given class of animal.
-     */
-    private Integer getColor(Object pieceType) {
-        Integer col = colors.get(pieceType);
-        if (col == null) { // no color defined for this class
-            return UNKNOWN_COLOR;
-        } else {
-            return col;
-        }
-    }
-
     private PImage getImage(Object pieceType) {
         PImage img = images.get(pieceType);
         return img;
     }
 
-    // return the y pixel value of the upper-left corner of location l
-    private float yCoordOf(Location l) {
-        return y + l.getRow() * dy;
-    }
-
-    // return the x pixel value of the upper-left corner of location l
-    private float xCoordOf(Location l) {
-        float shift = ( l.getRow()%2 == 1 ) ? x_shift : 0;
-        return x + shift + l.getCol() * dx;
-    }
-
     // Return location at coordinates x, y on the screen
     public Location gridLocationAt(float mousex, float mousey) {
-        int row = (int) Math.floor( (mousey - y) / dy );
+        int hex_x = 0;
+        for (int r = 0; r < rows; r++) {
+            hex_x = (r % 2 == 1) ? x + x_shift : x;
+            for (int c = 0; c < cols; c++) {
+                if (distance((int)(mousex), (int)(mousey), hex_x + c * dx, y + r * dy) < dx * 0.433) {
+                    return new Location(r, c);
+                }
+            }
+        }
+        return new Location(-1 , -1);
 
-        float shift = (row%2 == 1) ? x_shift : 0;
-        int col = (int) Math.floor( (mousex - (x + shift)) / dx );
+//        int row = (int) Math.floor( (mousey - y) / dy );
+//
+//        float shift = (row%2 == 1) ? x_shift : 0;
+//        int col = (int) Math.floor( (mousex - (x + shift)) / dx );
+    }
 
-        Location l = new Location(row , col);
-        return l;
+    private double distance(int x0, int y0, int x1, int y1) {
+        return Math.sqrt( ( Math.pow(x0-x1, 2) + Math.pow(y0-y1, 2) ));
     }
 
     public void setNumCols(int numCols) {
-        rows = numCols;
-        dx = w / rows;
+        cols = numCols;
+        dx = 10 + w / cols;
+        x_shift = (int)( 0.5 * dx );
     }
 
     public void setNumRows(int numRows) {
-        cols = numRows;
-        dy = h / cols;
+        rows = numRows;
+        dy = 5  + h / rows;
     }
 
     public void initializeWithGame(GameBoard game) {
         int[][] grid = game.getGrid();
         if (grid == null) {
-            System.out
-                    .println("Your 2d int array grid is null!  Create it by saying grid = new int[___][___] inside your constructor!");
+            System.out.println("Your 2d int array grid is null!  Create it by saying grid = new int[___][___] inside your constructor!");
         }
-        setNumCols(grid[0].length);
-        setNumRows(grid.length);
-        this.x_shift = dx/2;
+        setNumRows( grid.length );
+        setNumCols( grid[0].length );
         System.out.println("Setting display: # rows is " + grid.length + ", # cols is " + grid[0].length);
     }
 }
