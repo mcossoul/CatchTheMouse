@@ -1,6 +1,7 @@
 public class Mouse {
-    private int row, row_prev = 0;
-    private int col, col_prev = 0;
+    private int row = 0;
+    private int col = 0;
+    private boolean stuck = false;
 
     public Mouse(int row, int col) {
         this.row = row;
@@ -8,11 +9,14 @@ public class Mouse {
     }
 
     public boolean move(int dest_row, int dest_col) {
-        this.row_prev = this.row;
-        this.col_prev = this.col;
-        this.row = dest_row;
-        this.col = dest_col;
+        stuck = dest_row == row && dest_col == col;
+        row = dest_row;
+        col = dest_col;
         return true;
+    }
+
+    public boolean isStuck() {
+        return stuck;
     }
 
     public int getRow() {
@@ -21,13 +25,5 @@ public class Mouse {
 
     public int getCol() {
         return col;
-    }
-
-    public int getRowPrev() {
-        return row_prev;
-    }
-
-    public int getColPrev() {
-        return col_prev;
     }
 }

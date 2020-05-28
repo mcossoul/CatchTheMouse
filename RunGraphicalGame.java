@@ -24,13 +24,15 @@ public class RunGraphicalGame extends PApplet {
 	@Override
 	public void draw() {
 		background(200);
-		if ( game.isGameOver() ) {
-			display.drawInsideGrid(game.getGrid()); // display the game
+		if ( game.isGameOver() == 0 ) {
+			display.drawInsideGrid(game.getGrid()); // display the cheese
 			System.out.println("You lost! Try again.");
 			super.stop();
-		} else {
-			display.drawInsideGrid(game.getGrid()); // display the game
+		} else if ( game.isGameOver() == 1 ) {
+			System.out.println("You WIN!");
+			super.stop();
 		}
+		display.drawInsideGrid(game.getGrid()); // display the game
 	}
 
 	public void mouseReleased() {
@@ -43,9 +45,12 @@ public class RunGraphicalGame extends PApplet {
 			mouse_turn = !mouse_turn;
 		}
 		else {
-			game.addWall(row, col);
-			if (num_players ==1) { game.moveMouse(); }
-			mouse_turn = !mouse_turn;
+			if ( !game.addWall(row, col) ) {
+				System.out.println("Can't play there. Try again.");
+			} else {
+				if (num_players == 1) { game.moveMouse(); }
+				mouse_turn = !mouse_turn;
+			}
 		}
 	}
 

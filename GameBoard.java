@@ -3,7 +3,7 @@ import javax.naming.InitialContext;
 public class GameBoard {
 	private int[][] grid, move_grid; 						// the grid that stores the pieces
 	private Mouse mouse;
-    private static final int INIT_WALLS = 0; // 10; //3
+    private static final int INIT_WALLS = 30;
 	private static final int MOVE_WEIGHT = 3;
 
 	public GameBoard(int width, int height) {
@@ -76,6 +76,7 @@ public class GameBoard {
 	private int[] findDirection(int row, int col) {
 		int min = Integer.MAX_VALUE;
 		int[] min_coords = new int[2];
+		int count = 0;
 		for (int r = row-1; r <= row+1; r++) {
 			for (int c = col-1; c <= col+1 ; c++) {
 				// skip non hexagonal moves
@@ -86,7 +87,8 @@ public class GameBoard {
 				}
 
 				if ( isInGrid(r, c) && grid[r][c] == 0) {
-					if ( move_grid[r][c] < min ){
+				    count++;
+                    if ( move_grid[r][c] < min ){
 						min = move_grid[r][c];
 						min_coords[0] = r;
 						min_coords[1] = c;
@@ -94,9 +96,11 @@ public class GameBoard {
 				}
 			}
 		}
-		return min_coords;
+		if (count == 0) { return new int[] {row, col}; }
+        return min_coords;
 	}
 
+	// TODO add levels
 	private void initWalls(int num) {
 		int row=0, col=0;
 		for (int i = 0; i < num; i++) {
@@ -131,8 +135,8 @@ public class GameBoard {
 
 	public boolean moveMouse() {
 		int[] dest = findDirection( mouse.getRow(), mouse.getCol() );
-		grid_move( mouse.getRow(), mouse.getCol(), dest[0], dest[1] );
-		mouse.move(dest[0], dest[1]);
+        grid_move( mouse.getRow(), mouse.getCol(), dest[0], dest[1] );
+        mouse.move(dest[0], dest[1]);
 		return true;
 	}
 
@@ -162,22 +166,29 @@ public class GameBoard {
 		return (int)( Math.sqrt( Math.pow(row - r, 2) + Math.pow(col - c, 2) ) );
 	}
 
-	public void grid_move(int row, int col, int dest_row, int dest_col) {
-		int piece = grid[row][col];
-		grid[ dest_row ][ dest_col ] = piece;
-		grid[ row ][ col ] = 0;
+	public boolean grid_move(int row, int col, int dest_row, int dest_col) {
+	    if ( dest_row == row && dest_col == col ) { return false; }
+
+        int piece = grid[row][col];
+        grid[dest_row][dest_col] = piece;
+        grid[row][col] = 0;
+        return true;
 	}
 
 	/*
 	 * Return true if the game is over. False otherwise.
 	 */
-	public boolean isGameOver() {
-		// TODO add detection of mouse winning
-		if (mouse.getRow() == 0 || mouse.getRow() == grid.length-1 || mouse.getCol() == 0 || mouse.getCol() == grid[0].length-1) {
-			grid[ mouse.getRow() ][ mouse.getCol() ] = 2; // cheese
-			return true;
+    // TODO add detection of mouse winning
+	public int isGameOver() {
+        if ( mouse.isStuck() ) { // Game won: mouse is stuck
+            return 1;
+        } else if (mouse.getRow() == 0 || mouse.getRow() == grid.length-1 || mouse.getCol() == 0 || mouse.getCol() == grid[0].length-1) {
+            // Game lost: mouse is out
+            grid[ mouse.getRow() ][ mouse.getCol() ] = 2; // cheese
+			return 0;
 		}
-		return false;
+
+		return -1; // game continues
 	}
 
 	public int[][] getGrid() {
