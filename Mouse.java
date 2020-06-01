@@ -1,6 +1,6 @@
 public class Mouse {
-    private int row = 0;
-    private int col = 0;
+    private int row;
+    private int col;
     private boolean stuck = false;
 
     public Mouse(int row, int col) {
@@ -8,6 +8,7 @@ public class Mouse {
         this.col = col;
     }
 
+    // TODO stuck doesn't work for 2-player
     public boolean move(int dest_row, int dest_col) {
         stuck = dest_row == row && dest_col == col;
         row = dest_row;

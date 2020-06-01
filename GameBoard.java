@@ -1,21 +1,22 @@
 import javax.naming.InitialContext;
 
 public class GameBoard {
-	private int[][] grid, move_grid; 						// the grid that stores the pieces
-	private Mouse mouse;
-    private static final int INIT_WALLS = 30;
 	private static final int MOVE_WEIGHT = 3;
+
+	private int[][] grid, move_grid; // the grid that stores the pieces
+	private Mouse mouse;
+	private boolean debug = false;
 
 	public GameBoard(int width, int height) {
 		grid = new int[height][width];
 		move_grid = new int[height][width];
 		mouse = new Mouse(height/2, width/2);
+	}
 
-		// Initialize starting positions
-		grid[ mouse.getRow() ][ mouse.getCol() ] = 1;
-
-        initMoveGrid( MOVE_WEIGHT );
-		initWalls( INIT_WALLS );
+	public void reset(int walls) {
+		grid[ mouse.getRow() ][ mouse.getCol() ] = Const.PIECE_MOUSE;
+		initMoveGrid( MOVE_WEIGHT );
+		initWalls( walls );
 	}
 
 	private void initMoveGrid( int weight ) {
@@ -23,20 +24,24 @@ public class GameBoard {
 			for (int c = 1; c <= move_grid[0].length / 2; c++) {
 				if (r == 1 || c == 1) {
 					replicateQuarters(r, c, weight);
-
 				} else {
 					replicateQuarters(r, c, findMinValue(r, c) + weight);
 				}
 			}
 		}
-		displayGrid( move_grid );
+		if (debug) {
+			displayGrid(move_grid);
+		}
 	}
 
 	private void displayGrid(int[][] grid) {
-		System.out.println("[DEBUG] grid :");
+		System.out.println("[DEBUG] grid:");
 		for (int r = 0; r < grid.length; r++) {
+			if (r%2 == 1) {
+				System.out.print("  ");
+			}
 			for (int c = 0; c < grid[0].length; c++) {
-				System.out.print(grid[r][c] + "\t");
+				System.out.print(grid[r][c] + "   ");
 			}
 			System.out.println();
 		}
@@ -86,7 +91,7 @@ public class GameBoard {
 					}
 				}
 
-				if ( isInGrid(r, c) && grid[r][c] == 0) {
+				if ( isInGrid(r, c) && grid[r][c] == Const.PIECE_NONE) {
 				    count++;
                     if ( move_grid[r][c] < min ){
 						min = move_grid[r][c];
@@ -100,14 +105,13 @@ public class GameBoard {
         return min_coords;
 	}
 
-	// TODO add levels
 	private void initWalls(int num) {
-		int row=0, col=0;
+		int row, col;
 		for (int i = 0; i < num; i++) {
 			do {
 				row = (int)( 1 + Math.random() * (grid.length - 2) );
 				col = (int)( 1 + Math.random() * (grid[0].length - 2)  );
-			} while (grid[row][col] != 0);
+			} while ( grid[row][col] != Const.PIECE_NONE );
 			addWall(row, col);
 		}
 	}
@@ -115,7 +119,7 @@ public class GameBoard {
 	// Make the requested move at (row, col) by changing the grid.
 	// returns false if no move was made, true if the move was successful.
 	public boolean moveMouse(int dest_row, int dest_col) {
-		if ( !isInGrid(dest_row, dest_col) || grid[dest_row][dest_col] != 0 ||
+		if ( !isInGrid(dest_row, dest_col) || grid[dest_row][dest_col] != Const.PIECE_NONE ||
 				Math.abs(dest_row - mouse.getRow()) > 1  || Math.abs(dest_col - mouse.getCol()) > 1) {
 			return false;
 		}
@@ -141,12 +145,15 @@ public class GameBoard {
 	}
 
 	public boolean addWall(int dest_row, int dest_col) {
-		if ( !isInInsideGrid(dest_row, dest_col) || grid[dest_row][dest_col] != 0 ) {
+		if ( !isInInsideGrid(dest_row, dest_col) || grid[dest_row][dest_col] != Const.PIECE_NONE ) {
 			return false;
 		}
 
-		grid[ dest_row ][ dest_col ] = 4; // wall
+		grid[ dest_row ][ dest_col ] = Const.PIECE_WALL;
 		updateMoveGrid(dest_row, dest_col, 5);
+		if (debug) {
+			displayGrid( grid );
+		}
 		return true;
 	}
 
@@ -159,7 +166,9 @@ public class GameBoard {
 				}
 			}
 		}
-		displayGrid( move_grid );
+		if (debug) {
+			displayGrid( move_grid );
+		}
 	}
 
 	private int distance(int row, int col, int r, int c) {
@@ -171,24 +180,24 @@ public class GameBoard {
 
         int piece = grid[row][col];
         grid[dest_row][dest_col] = piece;
-        grid[row][col] = 0;
+        grid[row][col] = Const.PIECE_NONE;
         return true;
 	}
 
 	/*
 	 * Return true if the game is over. False otherwise.
 	 */
-    // TODO add detection of mouse winning
 	public int isGameOver() {
-        if ( mouse.isStuck() ) { // Game won: mouse is stuck
-            return 1;
-        } else if (mouse.getRow() == 0 || mouse.getRow() == grid.length-1 || mouse.getCol() == 0 || mouse.getCol() == grid[0].length-1) {
-            // Game lost: mouse is out
-            grid[ mouse.getRow() ][ mouse.getCol() ] = 2; // cheese
-			return 0;
+		// Mouse lost
+        if ( mouse.isStuck() ) {
+            return Const.WIN_WALL;
+        }
+		// Mouse won: reached a border
+        else if (mouse.getRow() == 0 || mouse.getRow() == grid.length-1 || mouse.getCol() == 0 || mouse.getCol() == grid[0].length-1) {
+            grid[ mouse.getRow() ][ mouse.getCol() ] = Const.PIECE_CHEESE;
+			return Const.WIN_MOUSE;
 		}
-
-		return -1; // game continues
+		return Const.WIN_NONE; // game is not over
 	}
 
 	public int[][] getGrid() {
@@ -197,10 +206,14 @@ public class GameBoard {
 
 	// Return true if the row and column in location loc are in bounds for the grid
 	public boolean isInGrid(int row, int col) {
-		return row >=0 && row < grid.length && col >= 0 && col < grid[0].length;
+		return row >= 0 && row < grid.length && col >= 0 && col < grid[0].length;
 	}
 
 	public boolean isInInsideGrid(int row, int col) {
-		return row >0 && row < grid.length-1 && col > 0 && col < grid[0].length-1;
+		return row > 0 && row < grid.length-1 && col > 0 && col < grid[0].length-1;
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
 	}
 }

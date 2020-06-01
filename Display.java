@@ -32,22 +32,28 @@ public class Display {
         int piece, hex_x;
         int img_dx = -dx/2; // origin shift (image top left, hexagon center)
         int img_dy = -dy/2;
+        PImage pieceImage;
 
         for (int r = 0; r < rows; r++) {
             hex_x = ( r%2 == 1 ) ? x + x_shift : x;
             for (int c = 0; c < cols; c++) {
                 piece = f[r][c];
-                if (piece == 1) { // mouse
-                    PImage pieceImage = getImage(piece);
-                    draw_hexagon( false, hex_x + c*dx, y + r*dy, dx ); // draw empty hexagon on top of it
-                    p.image(pieceImage, hex_x + img_dx + c*dx, y + img_dy + r*dy, dx, dy);
-                } else if (piece == 2) { // cheese
-                    PImage pieceImage = getImage(piece);
-                    p.image(pieceImage, hex_x + img_dx + c*dx, y + img_dy + r*dy, dx, dy);
-                } else if (piece == 4) { // wall
-                    draw_hexagon( true, hex_x + c*dx, y + r*dy, dx );
-                } else if ( r > 0 && r < rows-1 && c > 0 && c < cols-1 ){ // empty space
-                    draw_hexagon( false, hex_x + c * dx, y + r * dy, dx );
+                if (piece == Const.PIECE_CHEESE) {
+                    pieceImage = getImage(piece);
+                    p.image(pieceImage, hex_x + img_dx + c * dx, y + img_dy + r * dy, dx, dy);
+                }
+                else if ( r > 0 && r < rows-1 && c > 0 && c < cols-1 ) {
+                    if (piece == Const.PIECE_MOUSE) {
+                        pieceImage = getImage(piece);
+                        draw_hexagon(false, hex_x + c * dx, y + r * dy, dx); // draw empty hexagon on top of it
+                        p.image(pieceImage, hex_x + img_dx + c * dx, y + img_dy + r * dy, dx, dy);
+                    }
+                    else if (piece == Const.PIECE_WALL) {
+                        draw_hexagon(true, hex_x + c * dx, y + r * dy, dx);
+                    }
+                    else { // empty space
+                        draw_hexagon(false, hex_x + c * dx, y + r * dy, dx);
+                    }
                 }
             }
         }
@@ -58,7 +64,6 @@ public class Display {
         int hex_dx = (int)( 0.433 * diam );
         int hex_dy = (int)( 0.25 * diam );
 
-//        p.background(51);
         if (fill) {
             p.fill(196, 85, 26);
         } else {
@@ -98,14 +103,13 @@ public class Display {
         setImage(pieceType, img);
     }
 
-    private PImage getImage(Object pieceType) {
-        PImage img = images.get(pieceType);
-        return img;
+    public PImage getImage(Object pieceType) {
+        return images.get(pieceType);
     }
 
     // Return location at coordinates x, y on the screen
     public Location gridLocationAt(float mousex, float mousey) {
-        int hex_x = 0;
+        int hex_x;
         for (int r = 0; r < rows; r++) {
             hex_x = (r % 2 == 1) ? x + x_shift : x;
             for (int c = 0; c < cols; c++) {
@@ -115,11 +119,6 @@ public class Display {
             }
         }
         return new Location(-1 , -1);
-
-//        int row = (int) Math.floor( (mousey - y) / dy );
-//
-//        float shift = (row%2 == 1) ? x_shift : 0;
-//        int col = (int) Math.floor( (mousex - (x + shift)) / dx );
     }
 
     private double distance(int x0, int y0, int x1, int y1) {
