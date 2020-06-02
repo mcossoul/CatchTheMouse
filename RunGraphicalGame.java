@@ -23,15 +23,15 @@ public class RunGraphicalGame extends PApplet {
 		game = new GameBoard(13, 13);
 		game.setDebug(false);
 		menu = new Menu(this);
-
-		mouse_turn = false;
-		score = 20000;
-
 		display = new Display(this, 30, 65, 550, 550);
+		display.setDebug(false);
 		display.setImage(Const.PIECE_TITLE, "assets/catch_the_mouse.png");
 		display.setImage(Const.PIECE_MOUSE, "assets/mouse.png");
 		display.setImage(Const.PIECE_CHEESE, "assets/cheese.png");
 		display.initializeWithGame(game);
+
+		mouse_turn = false;
+		score = 20000;
 	}
 
 	@Override
@@ -40,12 +40,12 @@ public class RunGraphicalGame extends PApplet {
 		menu.buttonQuit.draw();
 
 		if ( screen == SCREEN_PLAYERS ) {
-			this.image( display.getImage(Const.PIECE_TITLE), 175, 0, 350, 350);
+			image( display.getImage(Const.PIECE_TITLE), 175, 0, 350, 350);
 			menu.button1P.draw();
 			menu.button2P.draw();
 		}
 		else if ( screen == SCREEN_LEVELS ) {
-			this.image( display.getImage(Const.PIECE_TITLE), 175, 0, 350, 350);
+			image( display.getImage(Const.PIECE_TITLE), 175, 0, 350, 350);
 			menu.buttonL1.draw();
 			menu.buttonL2.draw();
 			menu.buttonL3.draw();
@@ -57,16 +57,11 @@ public class RunGraphicalGame extends PApplet {
 					menu.messageScore.draw();
 				}
 				else { // 2 players
-					if (mouse_turn) {
-						menu.messageTurnMouse.draw();
-					} else {
-						menu.messageTurnWalls.draw();
-					}
+					if (mouse_turn) menu.messageTurnMouse.draw();
+					else 			menu.messageTurnWalls.draw();
 				}
 
-				if (playAgain) {
-					menu.messageBadMove.draw();
-				}
+				if (playAgain) menu.messageBadMove.draw();
 			}
 			else { // Game over
 				menu.buttonNewGame.draw();
@@ -76,15 +71,13 @@ public class RunGraphicalGame extends PApplet {
 						score = 0;
 						menu.messageScore.setText("Score: " + score);
 					} else { // Walls win
-						menu.messageWin.draw();
-					}
-					menu.messageScore.draw();
-				} else { // 2 players
-					if (game.isGameOver() == Const.WIN_MOUSE) {
-						menu.messageWinMouse.draw();
-					} else { // Walls win
 						menu.messageWinWalls.draw();
 					}
+					menu.messageScore.draw();
+				}
+				else { // 2 players
+					if (game.isGameOver() == Const.WIN_MOUSE) menu.messageWinMouse.draw();
+					else menu.messageWinWalls.draw();
 				}
 			}
 
@@ -97,39 +90,34 @@ public class RunGraphicalGame extends PApplet {
 			System.exit(0);
 		}
 
-		playAgain = false;
 		if ( screen == SCREEN_PLAYERS ) {
-			if (menu.button1P.isPressed(mouseX, mouseY)) {
+			if ( menu.button1P.isPressed(mouseX, mouseY) ) {
 				num_players = 1;
 				screen = SCREEN_LEVELS;
 			}
-			if (menu.button2P.isPressed(mouseX, mouseY)) {
+			if ( menu.button2P.isPressed(mouseX, mouseY) ) {
 				num_players = 2;
 				screen = SCREEN_LEVELS;
 			}
 		}
 		else if ( screen == SCREEN_LEVELS ) {
-			if (menu.buttonL1.isPressed(mouseX, mouseY)) {
+			if ( menu.buttonL1.isPressed(mouseX, mouseY) ) {
 				game.reset(12);
 				screen = SCREEN_GAME;
 			}
-			if (menu.buttonL2.isPressed(mouseX, mouseY)) {
+			if ( menu.buttonL2.isPressed(mouseX, mouseY) ) {
 				game.reset(8);
 				screen = SCREEN_GAME;
 			}
-			if (menu.buttonL3.isPressed(mouseX, mouseY)) {
+			if ( menu.buttonL3.isPressed(mouseX, mouseY) ) {
 				game.reset(4);
 				screen = SCREEN_GAME;
 			}
 		}
 		else { // SCREEN_GAME
-			if ( game.isGameOver() != Const.WIN_NONE ) {  // game over
-				if ( menu.buttonNewGame.isPressed( mouseX, mouseY ) ) {
-					setup();
-					screen = SCREEN_PLAYERS;
-				}
-			}
-			else {  // game is ongoing
+			playAgain = false;
+
+			if ( game.isGameOver() == Const.WIN_NONE ) {
 				Location loc = display.gridLocationAt(mouseX, mouseY);
 				int row = loc.getRow();
 				int col = loc.getCol();
@@ -138,23 +126,30 @@ public class RunGraphicalGame extends PApplet {
 					if (!game.addWall(row, col)) {
 						playAgain = true;
 					} else {
+						game.mouse.move();
 						score -= 500;
-						game.moveMouse();
 					}
 				} else {  // 2 players
 					if (mouse_turn) {
-						if (!game.moveMouse(row, col)) {
+						if (!game.mouse.move(row, col)) {
 							playAgain = true;
 						} else {
 							mouse_turn = !mouse_turn;
 						}
-					} else {
+					} else { // Walls' turn
 						if (!game.addWall(row, col)) {
 							playAgain = true;
 						} else {
 							mouse_turn = !mouse_turn;
 						}
 					}
+				}
+			}
+
+			if ( game.isGameOver() != Const.WIN_NONE ) {  // game over
+				if ( menu.buttonNewGame.isPressed( mouseX, mouseY ) ) {
+					setup();
+					screen = SCREEN_PLAYERS;
 				}
 			}
 		}

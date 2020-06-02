@@ -9,6 +9,7 @@ public class Display {
     private int x, y, w, h; // (x, y) of upper left corner of display, the width and height of the display
     private int dx, x_shift, dy; // calculate the width and height of each box
     private int rows, cols;
+    private boolean debug = false;
 
     // A map for storing colors for participants in the simulation
     private Map<Object, PImage> images;
@@ -21,7 +22,6 @@ public class Display {
         this.w = w;
         this.h = h;
         this.p = p;
-
         images = new LinkedHashMap<Object, PImage>();
     }
 
@@ -143,6 +143,10 @@ public class Display {
         }
         setNumRows( grid.length );
         setNumCols( grid[0].length );
-        System.out.println("Setting display: # rows is " + grid.length + ", # cols is " + grid[0].length);
+        if (debug) System.out.println("Setting display: # rows is " + grid.length + ", # cols is " + grid[0].length);
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 }
