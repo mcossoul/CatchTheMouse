@@ -70,7 +70,8 @@ public class RunGraphicalGame extends PApplet {
 						menu.messageWinMouse.draw();
 						score = 0;
 						menu.messageScore.setText("Score: " + score);
-					} else { // Walls win
+					}
+					else { // Walls win
 						menu.messageWinWalls.draw();
 					}
 					menu.messageScore.draw();
@@ -136,7 +137,8 @@ public class RunGraphicalGame extends PApplet {
 						} else {
 							mouse_turn = !mouse_turn;
 						}
-					} else { // Walls' turn
+					}
+					else { // Walls' turn
 						if (!game.addWall(row, col)) {
 							playAgain = true;
 						} else {

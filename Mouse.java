@@ -10,10 +10,7 @@ public class Mouse {
     }
 
     public boolean move(int dest_row, int dest_col) {
-        if ( !isMovePossible() ) {
-            return false;
-        }
-        if ( !isMoveValid(dest_row, dest_col) ) {
+        if ( !isMovePossible() || !isMoveValid(dest_row, dest_col) ) {
             return false;
         }
         game.movePiece(row, col, dest_row, dest_col);
@@ -38,7 +35,7 @@ public class Mouse {
         for (int r = row-1; r <= row+1; r++) {
             for (int c = col - 1; c <= col + 1; c++) {
                 // skip non-hexagonal moves
-                if (r != row && (row % 2 == 0 && c == col+1 || row % 2 == 1 && c == col-1)) {
+                if (r != row && (row % 2 == 0 && c == col+1 || row % 2 == 1 && c == col-1) ) {
                     continue;
                 }
                 if (game.isInGrid(r, c) && game.getGrid()[r][c] == Const.PIECE_NONE) {

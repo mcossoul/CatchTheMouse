@@ -15,8 +15,8 @@ public class GameBoard {
 
 	public void reset(int walls) {
 		grid[ mouse.getRow() ][ mouse.getCol() ] = Const.PIECE_MOUSE;
-		initMoveGrid( MOVE_WEIGHT );
 		initWalls( walls );
+		initMoveGrid( MOVE_WEIGHT );
 	}
 
 	private void initMoveGrid( int weight ) {
@@ -29,9 +29,7 @@ public class GameBoard {
 				}
 			}
 		}
-		if (debug) {
-			displayGrid(move_grid);
-		}
+		if (debug) displayGrid(move_grid);
 	}
 
 	private void displayGrid(int[][] grid) {
@@ -75,9 +73,7 @@ public class GameBoard {
 
 		grid[ dest_row ][ dest_col ] = Const.PIECE_WALL;
 		updateMoveGrid(dest_row, dest_col, 5);
-		if (debug) {
-			displayGrid( grid );
-		}
+		if (debug) displayGrid( grid );
 		return true;
 	}
 
@@ -99,10 +95,8 @@ public class GameBoard {
 		for (int r = row-1; r <= row+1; r++) {
 			for (int c = col-1; c <= col+1 ; c++) {
 				// skip non hexagonal moves
-				if ( r != row ) {
-					if ( row%2 == 0 && c == col+1 || row%2 == 1 && c == col-1) {
-						continue;
-					}
+				if ( r != row && ( row%2 == 0 && c == col+1 || row%2 == 1 && c == col-1) ) {
+					continue;
 				}
 
 				if (isInGrid(r, c) ) {
@@ -154,7 +148,7 @@ public class GameBoard {
         }
 		// Mouse won: reached an edge
         else if ( isAtEdge( mouse.getRow(), mouse.getCol()) ) {
-			// Replace the mouse with the cheese
+			// Replace the mouse icon with the cheese
             grid[ mouse.getRow() ][ mouse.getCol() ] = Const.PIECE_CHEESE;
 			return Const.WIN_MOUSE;
 		}
